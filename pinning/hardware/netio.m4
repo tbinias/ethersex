@@ -13,7 +13,8 @@ ifdef(`conf_ONEWIRE', `dnl
 
 ifdef(`conf_STELLA', `dnl
   /* stella port 1 */
-  STELLA_PORT1_RANGE(PC0,PC7)
+  STELLA_USE_TIMER(2)
+  STELLA_PORT1_RANGE(PC0,PC5)
 ')dnl
 
 dnl STELLA_PORT2_RANGE(PA0,PA3)

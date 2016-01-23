@@ -91,7 +91,7 @@ int16_t parse_cmd_stella_channel (char *cmd, char *output, uint16_t len)
 {
 	char f = 0;
 	uint8_t ch = 0;
-	uint8_t value = 0;
+	uint16_t value = 0;
 
 #ifdef TEENSY_SUPPORT
 	while(*cmd == 32) cmd ++;

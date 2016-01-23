@@ -4,21 +4,21 @@ dnl
 dnl   Copyright (c) 2008 by Christian Dietrich <stettberger@dokucode.de>
 dnl   Copyright (c) 2008,2009 by Stefan Siegl <stesie@brokenpipe.de>
 dnl   Copyright (c) 2008 by Jochen Roessner <jochen@lugrot.de>
-dnl  
+dnl
 dnl   This program is free software; you can redistribute it and/or modify
-dnl   it under the terms of the GNU General Public License as published by 
+dnl   it under the terms of the GNU General Public License as published by
 dnl   the Free Software Foundation; either version 3 of the License, or
 dnl   (at your option) any later version.
-dnl  
+dnl
 dnl   This program is distributed in the hope that it will be useful,
 dnl   but WITHOUT ANY WARRANTY; without even the implied warranty of
 dnl   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 dnl   GNU General Public License for more details.
-dnl  
+dnl
 dnl   You should have received a copy of the GNU General Public License
 dnl   along with this program; if not, write to the Free Software
 dnl   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-dnl  
+dnl
 dnl   For more information on the GPL, please go to:
 dnl   http://www.gnu.org/copyleft/gpl.html
 dnl
@@ -74,7 +74,7 @@ ifelse(regexp($2, `^P[A-Z][0-9]$'), `-1', `', `
 #define $2_USED 1
 define(`port_mask_'pinname, eval(PM(pinname) | (1 << pinnum)))dnl
 ')dnl
-  
+
 ')
 
 define(`RFM12_NO_INT', `dnl
@@ -202,6 +202,7 @@ define(`STELLA_USE_TIMER', `dnl
 #define STELLA_PRESCALER   		format(_TCCR%s_PRESCALE, $1)
 #define STELLA_TIMSK       		_TIMSK_TIMER$1
 #define STELLA_CS0         		format(CS%s0, $1)
+#define STELLA_CS1         		format(CS%s1, $1)
 #define STELLA_CS2         		format(CS%s2, $1)
 #define STELLA_TOIE        		TOIE$1
 #define STELLA_COMPARE_IE  		_OUTPUT_COMPARE_IE$1
@@ -293,7 +294,7 @@ divert(1)
 
 #define _PIN_CHAR(character) PIN ## character
 #define PIN_CHAR(character) _PIN_CHAR(character)
- 
+
 #define _DDR_CHAR(character) DDR ## character
 #define DDR_CHAR(character) _DDR_CHAR(character)
 
@@ -309,4 +310,3 @@ divert(1)
 #define PIN_TOGGLE(pin) PORT_CHAR(pin ## _PORT) ^= _BV(pin ## _PIN)
 #define PIN_PULSE(pin) do { PORT_CHAR(pin ## _PORT) &= ~_BV(pin ## _PIN); \
                               PORT_CHAR(pin ## _PORT) ^= _BV(pin ## _PIN); } while(0)'
-

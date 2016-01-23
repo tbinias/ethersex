@@ -71,7 +71,7 @@ struct stella_port_with_portmask
 
 struct stella_timetable_entry
 {
-	uint8_t value;
+	uint16_t value;
 	struct stella_port_with_portmask port;
 	struct stella_timetable_entry* next;
 };
@@ -102,15 +102,15 @@ extern uint8_t stella_portmask[STELLA_PORT_COUNT];
 extern uint8_t stella_fade_step;
 extern uint8_t stella_fade_func;
 
-extern uint8_t stella_brightness[STELLA_CHANNELS];
-extern uint8_t stella_fade[STELLA_CHANNELS];
+extern uint16_t stella_brightness[STELLA_CHANNELS];
+extern uint16_t stella_fade[STELLA_CHANNELS];
 
 /* stella.c */
 void stella_init(void);
 void stella_process(void);
 
-uint8_t stella_getValue(const uint8_t channel);
-void stella_setValue(const enum stella_set_function func, const uint8_t channel, const uint8_t value);
+uint16_t stella_getValue(const uint8_t channel);
+void stella_setValue(const enum stella_set_function func, const uint8_t channel, const uint16_t value);
 void stella_setFadestep(const uint8_t fadestep);
 uint8_t stella_getFadestep();
 

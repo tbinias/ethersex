@@ -25,10 +25,10 @@
 #include "core/eeprom.h"
 #include "core/debug.h"
 #include "stella.h"
-#include "stella_fading_functions.h"
+//#include "stella_fading_functions.h"
 
-uint8_t stella_brightness[STELLA_CHANNELS];
-uint8_t stella_fade[STELLA_CHANNELS];
+uint16_t stella_brightness[STELLA_CHANNELS];
+uint16_t stella_fade[STELLA_CHANNELS];
 
 uint8_t stella_fade_func = STELLA_FADE_FUNCTION_INIT;
 uint8_t stella_fade_step = STELLA_FADE_STEP_INIT;
@@ -51,7 +51,7 @@ stella_init (void)
 	int_table = &timetable_1;
 	cal_table = &timetable_2;
 	cal_table->head = 0;
-	
+
 	stella_sync = NOTHING_NEW;
 
 	/* set stella port pins to output and save the port mask */
@@ -80,23 +80,29 @@ stella_init (void)
 	memset(stella_fade, 255, sizeof(stella_fade));
 	#endif
 
+	memset(stella_fade, 0, sizeof(stella_fade));
+
 	stella_sort();
 
 	/* we need at least 64 ticks for the compare interrupt,
 	* therefore choose a prescaler of at least 64. */
-	
+
 	#ifdef STELLA_HIGHFREQ
 	/* High frequency PWM Mode, 64 Prescaler */
-	STELLA_PRESCALER = _BV(STELLA_CS2);
-	debug_printf("Stella freq: %u Hz\n", F_CPU/64/(256*2));
+	//STELLA_PRESCALER = _BV(STELLA_CS2);
+	//debug_printf("Stella freq: %u Hz\n", F_CPU/64/(256*2));
 	#else
 	/* Normal PWM Mode, 128 Prescaler */
-	STELLA_PRESCALER |= _BV(STELLA_CS0) | _BV(STELLA_CS2);
-	debug_printf("Stella freq: %u Hz\n", F_CPU/128/(256*2));
+	//STELLA_PRESCALER |= _BV(STELLA_CS0) | _BV(STELLA_CS2);
+	//debug_printf("Stella freq: %u Hz\n", F_CPU/128/(256*2));
 	#endif
+
+	STELLA_PRESCALER = _BV(STELLA_CS0) | _BV(STELLA_CS1) | _BV(WGM21);
 
 	/* Interrupt on overflow and CompareMatch */
 	STELLA_TIMSK |= _BV(STELLA_TOIE) | _BV(STELLA_COMPARE_IE);
+
+	STELLA_COMPARE_REG = 4;
 }
 
 uint8_t
@@ -126,26 +132,26 @@ stella_process (void)
 {
 
 	/* the main loop is too fast, slow down */
-	if (stella_fade_counter == 0)
-	{
-		uint8_t i;
+	//if (stella_fade_counter == 0)
+	//{
+	//	uint8_t i;
 		/* Fade channels. stella_fade_counter is 0 currently. Set to 1
 		if fading changed a channel brigthness value */
-		for (i = 0; i < STELLA_CHANNELS; ++i)
-		{
-			if (stella_brightness[i] == stella_fade[i])
-				continue;
+	//	for (i = 0; i < STELLA_CHANNELS; ++i)
+	//	{
+	//		if (stella_brightness[i] == stella_fade[i])
+	//			continue;
 
-			stella_fade_funcs[stella_fade_func].p (i);
+	//		stella_fade_funcs[stella_fade_func].p (i);
 
-			stella_fade_counter = 1;
-		}
+	//		stella_fade_counter = 1;
+	//	}
 
-		if (stella_fade_counter) stella_sync = UPDATE_VALUES;
+	//	if (stella_fade_counter) stella_sync = UPDATE_VALUES;
 
 		/* reset counter */
-		stella_fade_counter = stella_fade_step;
-	}
+	//	stella_fade_counter = stella_fade_step;
+	//}
 
 	/* sort if new values are available */
 	if (stella_sync == UPDATE_VALUES)
@@ -153,7 +159,7 @@ stella_process (void)
 }
 
 void
-stella_setValue(const enum stella_set_function func, const uint8_t channel, const uint8_t value)
+stella_setValue(const enum stella_set_function func, const uint8_t channel, const uint16_t value)
 {
 	#ifdef DEBUG_STELLA
 		debug_printf("STELLA: channel: %d of %d\n", channel+1, STELLA_CHANNELS);
@@ -185,8 +191,8 @@ stella_setValue(const enum stella_set_function func, const uint8_t channel, cons
 			#endif
 			break;
 		case STELLA_SET_IMMEDIATELY_RELATIVE:
-			stella_brightness[channel] += (int8_t)value;
-			stella_fade[channel] += (int8_t)value;
+			stella_brightness[channel] += (int16_t)value;
+			stella_fade[channel] += (int16_t)value;
 			stella_sync = UPDATE_VALUES;
 			#ifdef DEBUG_STELLA
 				debug_printf("STELLA: set imidiatley relative value: %d\n", value);
@@ -210,7 +216,7 @@ uint8_t stella_getFadestep() {
 
 /* Get a channel value.
  * Only call this function with a channel<STELLA_CHANNELS ! */
-inline uint8_t
+inline uint16_t
 stella_getValue(const uint8_t channel)
 {
 	return stella_brightness[channel];
@@ -289,7 +295,7 @@ stella_sort()
 			cal_table->channel[i].port.port = &STELLA_PORT2;
 		}
 		#endif
-		cal_table->channel[i].value = 255 - stella_brightness[i];
+		cal_table->channel[i].value = 1023 - stella_brightness[i];
 		cal_table->channel[i].next = 0;
 
 		/* Special case: 0% brightness (Don't include this channel!) */
@@ -298,7 +304,7 @@ stella_sort()
 		//cal_table->portmask |= _BV(i+STELLA_OFFSET);
 
 		/* Special case: 100% brightness (Merge pwm cycle start masks! Don't include this channel!) */
-		if (stella_brightness[i] == 255)
+		if (stella_brightness[i] == 1023)
 		{
 			#ifdef STELLA_PINS_PORT2
 			if (i>=STELLA_PINS_PORT1)
