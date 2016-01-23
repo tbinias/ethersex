@@ -42,7 +42,7 @@ int16_t enc28j60_next_packet_pointer;
 #ifdef RFM12_IP_SUPPORT
 /* RFM12 uses interrupts which do SPI interaction, therefore
    we have to disable interrupts if support is enabled */
-#  define cs_low()  uint8_t sreg = SREG; cli(); PIN_CLEAR(SPI_CS_NET); 
+#  define cs_low()  uint8_t sreg = SREG; cli(); PIN_CLEAR(SPI_CS_NET);
 #  define cs_high() PIN_SET(SPI_CS_NET); SREG = sreg;
 #else
 #  define cs_low()  PIN_CLEAR(SPI_CS_NET)
@@ -363,12 +363,13 @@ void switch_bank(uint8_t bank)
 
 }
 
-void enc28j60_periodic(void) 
+void enc28j60_periodic(void)
 {
     uint8_t mask = _BV(PADCFG0) | _BV(TXCRCEN) | _BV(FRMLNEN);
 
-    if ((read_control_register(REG_MACON3) & mask) != mask) {
-	init_enc28j60();
+    if ((read_control_register(REG_MACON3) & mask) != mask
+        || (read_control_register(REG_MACON1))     != 0x0D ) {
+	  init_enc28j60();
     }
 }
 
